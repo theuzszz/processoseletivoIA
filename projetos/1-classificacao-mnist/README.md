@@ -107,8 +107,8 @@ As principais tecnologias e versões utilizadas foram:
 
 - Python 3.11.15;
 - TensorFlow 2.21.0;
-- Keras 3.15.0, utilizado pela interface `tf.keras`;
-- NumPy 2.4.6;
+- Keras 3.12.3, utilizado pela interface `tf.keras`;
+- NumPy 2.2.6;
 - `pathlib`, da biblioteca padrão do Python, para manipulação segura dos caminhos dos artefatos;
 - TensorFlow Lite, disponibilizado pelo próprio TensorFlow, para conversão, otimização e inferência do modelo de Edge AI.
 
@@ -120,3 +120,42 @@ O modelo `model.h5` foi carregado com `tf.keras.models.load_model()` e convertid
 
 ```python
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
+```
+
+### 4️⃣ Métricas e Tamanhos dos Modelos
+
+O treinamento utilizou um split explícito de 54.000 imagens para treino e 6.000 imagens para validação. A métrica utilizada foi a acurácia, adequada para a classificação multiclasse balanceada do MNIST.
+
+- Melhor acurácia de validação observada durante o treinamento: **99,00%**;
+- Acurácia no conjunto completo de teste: **98,85%**;
+- Acurácia do `model.h5` em 300 amostras no validador oficial: **99,33%**;
+- Acurácia do `model.tflite` em 300 amostras no validador oficial: **99,33%**;
+- Tamanho real do `model.h5`: **788,91 KB**;
+- Tamanho real do `model.tflite`: **69,76 KB**;
+- Redução de tamanho após a otimização: **91,16%**, equivalente a aproximadamente **719,15 KB**.
+
+A igualdade de acurácia entre o modelo Keras e o modelo TensorFlow Lite nas 300 amostras indica que a quantização dinâmica preservou o desempenho nessa avaliação.
+
+### 5️⃣ Dificuldades, Decisões e Limitações
+
+A principal dificuldade encontrada foi a compatibilidade de serialização do arquivo H5 entre versões diferentes do Keras. O modelo gerado inicialmente não era carregado pelo ambiente Python 3.10 do GitHub Actions porque havia sido salvo com uma versão mais recente do Keras. Para tornar a execução reproduzível, as versões foram fixadas no `requirements.txt` em TensorFlow 2.21.0, Keras 3.12.3 e NumPy 2.2.6, e o modelo foi gerado novamente nesse ambiente compatível.
+
+A arquitetura foi mantida com três blocos convolucionais e filtros progressivos de 16, 32 e 64 para equilibrar capacidade de aprendizado, tempo de treinamento em CPU e tamanho do artefato para Edge AI. O `Dropout` de 0,4 e o `EarlyStopping` com paciência de duas épocas foram escolhidos para reduzir sobreajuste e evitar épocas desnecessárias.
+
+Como limitação, o treinamento foi executado somente em CPU e o MNIST possui imagens simples em tons de cinza. Portanto, os resultados não devem ser generalizados diretamente para bases coloridas ou cenários visuais mais complexos.
+
+### 6️⃣ Inferência com o Modelo Otimizado
+
+O script `run_inference.py` carregou especificamente o arquivo `model.tflite` e executou cinco amostras do conjunto de teste. A saída observada foi:
+
+```text
+Rodando inferencia em 5 amostras usando model.tflite:
+
+Amostra 1: predito=7 | real=7
+Amostra 2: predito=2 | real=2
+Amostra 3: predito=1 | real=1
+Amostra 4: predito=0 | real=0
+Amostra 5: predito=4 | real=4
+```
+
+Nas cinco amostras observadas, todas as previsões coincidiram com os rótulos reais. O caso do dígito 7, por exemplo, foi classificado corretamente mesmo após a conversão e a quantização dinâmica. Essa pequena amostra confirma o funcionamento da inferência, mas a acurácia calculada no conjunto de validação continua sendo uma evidência mais representativa do desempenho geral.
