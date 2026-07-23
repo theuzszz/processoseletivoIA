@@ -85,28 +85,38 @@ projetos/1-classificacao-mnist/
 
 ## 📝 Relatório do Candidato
 
-👤 **Nome Completo:**
+👤 **Nome Completo:** Matheus Souza da Silva Leite
 
 ### 1️⃣ Resumo da Arquitetura do Modelo
 
-Descreva, em palavras, a arquitetura da CNN implementada em `train_model.py` (número de blocos convolucionais, uso de batch normalization/dropout, estratégia de validação/early stopping).
+O modelo implementado é uma rede neural convolucional sequencial para classificação das dez classes do MNIST. As imagens foram normalizadas para o intervalo [0, 1] e tiveram seu formato ajustado de `(28, 28)` para `(28, 28, 1)`, acrescentando explicitamente o canal de escala de cinza.
+
+Foi realizado um split explícito do conjunto originalmente destinado ao treinamento: 54.000 imagens foram usadas para treino e 6.000 para validação. O conjunto oficial de teste, com 10.000 imagens, foi mantido separado e utilizado somente para a avaliação final.
+
+A CNN possui três blocos convolucionais. O primeiro utiliza 16 filtros, o segundo 32 e o terceiro 64, todos com kernels 3x3 e `padding="same"`. Cada bloco é composto por `Conv2D`, `BatchNormalization`, ativação ReLU e `MaxPooling2D` 2x2. Depois dos blocos, a saída é achatada com `Flatten`, processada por uma camada densa de 64 neurônios com ReLU e regularizada por um `Dropout` de 40%. A camada de saída possui 10 neurônios com ativação softmax, um para cada dígito de 0 a 9.
+
+Foi utilizado o otimizador Adam com taxa de aprendizado de 0,001, batch size de 128 e limite de 12 épocas. O treinamento empregou `EarlyStopping` monitorando `val_loss`, com paciência de duas épocas e `restore_best_weights=True`.
+
+A quantidade progressiva de 16, 32 e 64 filtros foi escolhida para permitir que as primeiras camadas identificassem características simples, como bordas, enquanto as camadas seguintes combinassem essas informações em padrões mais complexos. O batch size de 128 foi escolhido como equilíbrio entre estabilidade do gradiente, consumo de memória e velocidade de treinamento em CPU. A paciência de duas épocas evita interromper o treinamento por causa de uma única oscilação da perda de validação, mas também impede a execução desnecessária de todas as 12 épocas quando não há melhora.
+
+O treinamento foi configurado exclusivamente para CPU e utilizou seed 42 para aumentar a reprodutibilidade.
 
 ### 2️⃣ Bibliotecas Utilizadas
 
-Liste as principais bibliotecas utilizadas, preferencialmente com suas versões.
+As principais tecnologias e versões utilizadas foram:
+
+- Python 3.11.15;
+- TensorFlow 2.21.0;
+- Keras 3.15.0, utilizado pela interface `tf.keras`;
+- NumPy 2.4.6;
+- `pathlib`, da biblioteca padrão do Python, para manipulação segura dos caminhos dos artefatos;
+- TensorFlow Lite, disponibilizado pelo próprio TensorFlow, para conversão, otimização e inferência do modelo de Edge AI.
 
 ### 3️⃣ Técnica de Otimização do Modelo
 
-Explique qual técnica foi utilizada para otimizar o modelo em `optimize_model.py`.
+A técnica utilizada foi a **Dynamic Range Quantization**, aplicada durante a conversão do modelo Keras para TensorFlow Lite.
 
-### 4️⃣ Resultados Obtidos
+O modelo `model.h5` foi carregado com `tf.keras.models.load_model()` e convertido por meio de `tf.lite.TFLiteConverter.from_keras_model()`. A otimização foi ativada explicitamente com:
 
-Informe a acurácia de validação obtida e o tamanho dos arquivos `model.h5` e `model.tflite`.
-
-### 5️⃣ Comentários Adicionais (Opcional)
-
-Dificuldades encontradas, decisões técnicas importantes, limitações do modelo, aprendizados durante o desafio.
-
-### 6️⃣ Exemplo de Inferência
-
-Cole a saída do terminal ao rodar `run_inference.py` (predito vs. real para as 5+ amostras), e comente brevemente se houve algum caso interessante (acerto ou erro) entre as amostras testadas.
+```python
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
