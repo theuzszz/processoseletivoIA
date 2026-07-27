@@ -159,3 +159,5 @@ Amostra 5: predito=4 | real=4
 ```
 
 Nas cinco amostras observadas, todas as previsões coincidiram com os rótulos reais. O caso do dígito 7, por exemplo, foi classificado corretamente mesmo após a conversão e a quantização dinâmica. Essa pequena amostra confirma o funcionamento da inferência, mas a acurácia calculada no conjunto de validação continua sendo uma evidência mais representativa do desempenho geral.
+
+<!-- Entrega do desafio técnico - Matheus Souza da Silva Leite -->
