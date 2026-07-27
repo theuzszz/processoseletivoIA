@@ -1,3 +1,5 @@
+# Entrega do desafio técnico - Matheus Souza da Silva Leite
+
 import numpy as np
 import tensorflow as tf
 

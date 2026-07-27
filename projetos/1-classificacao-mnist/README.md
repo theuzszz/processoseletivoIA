@@ -130,9 +130,9 @@ O treinamento utilizou um split explícito de 54.000 imagens para treino e 6.000
 - Acurácia no conjunto completo de teste: **98,85%**;
 - Acurácia do `model.h5` em 300 amostras no validador oficial: **99,33%**;
 - Acurácia do `model.tflite` em 300 amostras no validador oficial: **99,33%**;
-- Tamanho real do `model.h5`: **788,91 KB**;
-- Tamanho real do `model.tflite`: **69,76 KB**;
-- Redução de tamanho após a otimização: **91,16%**, equivalente a aproximadamente **719,15 KB**.
+- Tamanho real do `model.h5`: **794,91 KB**;
+- Tamanho real do `model.tflite`: **69,84 KB**;
+- Redução de tamanho após a otimização: **91,21%**, equivalente a aproximadamente **725,08 KB**.
 
 A igualdade de acurácia entre o modelo Keras e o modelo TensorFlow Lite nas 300 amostras indica que a quantização dinâmica preservou o desempenho nessa avaliação.
 
@@ -160,4 +160,4 @@ Amostra 5: predito=4 | real=4
 
 Nas cinco amostras observadas, todas as previsões coincidiram com os rótulos reais. O caso do dígito 7, por exemplo, foi classificado corretamente mesmo após a conversão e a quantização dinâmica. Essa pequena amostra confirma o funcionamento da inferência, mas a acurácia calculada no conjunto de validação continua sendo uma evidência mais representativa do desempenho geral.
 
-<!-- Entrega do desafio técnico - Matheus Souza da Silva Leite -->
+<!-- Entrega final do desafio técnico - Matheus Souza da Silva Leite -->
